@@ -37,4 +37,46 @@ describe("AlunoRepository", () => {
     const alunos = await repository.findAll();
     expect(alunos.length).toBe(1);
   });
+
+  test("Repositório deve listar todos os alunos", async () => {
+    await repository.create({
+      nome:"João",
+      idade:25
+    });
+
+    const result = await repository.findAll();
+
+    expect(result[0]).toStrictEqual(expect.objectContaining({
+      nome:"João",
+      idade:25
+    }))
+  });
+
+  test("Repositório deve atualizar um aluno", async () => {
+    const aluno = await repository.create({
+      nome:"Jonas",
+      idade:15
+    });
+    aluno.idade = 18;
+    await repository.update(aluno);
+
+    const result = await repository.findById(aluno._id);
+    expect(result).toStrictEqual(expect.objectContaining({
+      nome:"Jonas",
+      idade:18
+    }));
+  });
+
+  test("Repositorio deve remover um aluno", async () => {
+    const aluno = await repository.create({
+      nome:"Jonas",
+      idade:15
+    });
+
+    await repository.delete(aluno);
+
+    const alunos = await repository.findAll();
+    expect(alunos.length).toBe(0);
+  });
+
 });

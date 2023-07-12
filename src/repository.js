@@ -1,3 +1,5 @@
+const mongo = require('mongodb');
+
 class AlunoRepository {
   collection;
   constructor(collection) {
@@ -15,6 +17,12 @@ class AlunoRepository {
   }
   async update(aluno){
     await this.collection.updateOne({_id: aluno._id},{$set: aluno});
+  }
+  async findById(id){
+    return await this.collection.findOne({_id: new mongo.ObjectId(id)})
+  }
+  async delete(aluno){
+    await this.collection.deleteOne({_id: aluno._id});
   }
 }
 module.exports = AlunoRepository;

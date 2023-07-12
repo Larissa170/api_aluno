@@ -25,23 +25,19 @@ describe("API de CRUD Alunos", () => {
   });
 
   test("GET /alunos", async () => {
-    await repository.save({
+    await repository.create({
       nome: "Laura",
-      idade: 15,
+      idade: 15
     });
 
-    const response = await request
-      .get("/alunos")
-      .expect("Content-type", /application\/json/);
+    const response = await request.get("/alunos").expect("Content-type", /application\/json/);
     expect(response.statusCode).toBe(200);
     expect(response.body.length).toBe(1);
-    expect(
-      response.body[0].toStrictEqual(
-        expect.objectContaing({
-          nome: "Laura",
-          idade: 15
-        })
-      )
+    expect(response.body[0]).toStrictEqual(
+      expect.objectContaining({
+        nome: "Laura",
+        idade: 15
+      })    
     );
   });
   test.todo("POST /alunos");
