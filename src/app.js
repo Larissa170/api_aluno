@@ -1,42 +1,31 @@
 const express = require("express");
-const { MongoClient } = require("mongodb");
 const AlunoRepository = require("./repository");
+const Container = require("./container");
 
 const app = express();
 app.use(express.json());
-const dsn =
-  "mongodb://root:root@localhost?retryWrites=true&writeConcern=majority";
-const client = new MongoClient(dsn);
+
+app.set("container", new Container());
 
 app.get("/alunos", async (request, response) => {
-  await client.connect();
-  const collection = client.db("ap_db").collection("alunos");
-  const repository = new AlunoRepository(collection);
+  const repository = await app.get("container").getRepository();
 
   const alunos = await repository.findAll();
-  await client.close();
 
   response.json(alunos);
 });
 
 app.post("/alunos", async (request, response) => {
-  await client.connect();
-  const collection = client.db("ap_db").collection("alunos");
-  const repository = new AlunoRepository(collection);
-
+  const repository = await app.get("container").getRepository();
   try {
     const aluno = await repository.create(request.body);
     response.status(201).json(aluno);
   } catch (e) {
     response.status(500).json({ error: e.message });
   }
-
-  await client.close();
 });
 app.get("/alunos/:id", async (request, response) => {
-  await client.connect();
-  const collection = client.db("ap_db").collection("alunos");
-  const repository = new AlunoRepository(collection);
+  const repository = await app.get("container").getRepository();
   try {
     const aluno = await repository.findById(request.params.id);
     if (aluno === null) {
@@ -51,14 +40,12 @@ app.get("/alunos/:id", async (request, response) => {
     console.log(e);
     response.status(500).json({ error: e.message });
   }
-  await client.close();
 });
 
 app.put("/alunos/:id", async (request, response) => {
-  await client.connect();
-  const collection = client.db("ap_db").collection("alunos");
-  const repository = new AlunoRepository(collection);
+  const repository = await app.get("container").getRepository();
   const aluno = await repository.findById(request.params.id);
+
   if (aluno === null) {
     response.status(404).json({
       status: 404,
@@ -69,13 +56,9 @@ app.put("/alunos/:id", async (request, response) => {
     await repository.update(newAluno);
     response.json(newAluno);
   }
-
-  await client.close();
 });
 app.delete("/alunos/:id", async (request, response) => {
-  await client.connect();
-  const collection = client.db("ap_db").collection("alunos");
-  const repository = new AlunoRepository(collection);
+  const repository = await app.get("container").getRepository();
   const aluno = await repository.findById(request.params.id);
 
   if (null !== aluno) {
@@ -87,7 +70,5 @@ app.delete("/alunos/:id", async (request, response) => {
       error: "Aluno não encontrado",
     });
   }
-
-  await client.close();
 });
 module.exports = app;

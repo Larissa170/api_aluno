@@ -1,20 +1,15 @@
 const app = require("./app");
-
+const Container = require("./container");
 const request = require("supertest")(app);
-const AlunoRepository = require("./repository");
-const { MongoClient } = require("mongodb");
 
 describe("API de CRUD Alunos", () => {
   let repository;
   let client;
   // conexao que será usada em tods os testes
   beforeAll(async () => {
-    const dsn =
-      "mongodb://root:root@localhost?retryWrites=true&writeConcern=majority";
-    client = new MongoClient(dsn);
-    await client.connect();
-    const collection = client.db("ap_db").collection("alunos");
-    repository = new AlunoRepository(collection);
+    const container = new Container();
+    client = container.getClient();
+    repository = await container.getRepository();
   });
   afterAll(async () => {
     await client.close();
@@ -22,9 +17,6 @@ describe("API de CRUD Alunos", () => {
 
   beforeEach(async () => {
     await repository.deleteAll();
-  });
-  afterEach(async () => {
-    //await client.close();
   });
 
   test("GET /alunos", async () => {
